@@ -75,6 +75,20 @@ def train_one_epoch(model, training_loader, optimiser, loss_fn, len_dataset):
     return running_loss/len_dataset
 
 
+def get_validation_loss(model, validation_loader, loss_fn, len_dataset):
+    import torch
+
+    running_vloss = 0.
+    with torch.no_grad():
+        for i, vdata in enumerate(validation_loader):
+            v_inputs, v_fn_values = vdata
+            v_outputs = model(v_inputs)
+            vloss = loss_fn(v_outputs.squeeze(), v_fn_values)
+            running_vloss += vloss.item()
+        validation_loss = running_vloss/(len_dataset)
+    return validation_loss
+
+
 def fit_network(filename):
     import math
     import pandas as pd
@@ -164,18 +178,11 @@ def fit_network(filename):
                                         len(surface_train_dataset))
 
         model.eval()
-        running_vloss = 0.
-
-        with torch.no_grad():
-            for i, vdata in enumerate(validation_loader):
-                v_inputs, v_fn_values = vdata
-                v_outputs = model(v_inputs)
-                vloss = loss_fn(v_outputs.squeeze(), v_fn_values)
-                running_vloss += vloss.item()
-            validation_loss = running_vloss/(len(surface_valid_dataset))
-            if validation_loss < validation_loss_min:
-                validation_loss_min = validation_loss
-                validation_loss_min_epoch = epoch
+        validation_loss = get_validation_loss(model, validation_loader,
+                                              loss_fn, len(surface_valid_dataset))
+        if validation_loss < validation_loss_min:
+            validation_loss_min = validation_loss
+            validation_loss_min_epoch = epoch
 
         print(f'Epoch: {epoch+1}, Training Loss: {training_loss},\
               Validation Loss: {validation_loss}')
