@@ -63,7 +63,7 @@ def train_one_epoch(model, training_loader, optimiser, loss_fn, len_dataset):
     '''
     running_loss = 0.
 
-    for i, data in enumerate(training_loader):
+    for data in training_loader:
         inputs, fn_values = data
         optimiser.zero_grad()
         outputs = model(inputs)
