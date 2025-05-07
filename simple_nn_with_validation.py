@@ -1,4 +1,3 @@
-# if __name__ == '__main__':
 def fit_network(filename):
     import math
     import pandas as pd
@@ -76,6 +75,9 @@ def fit_network(filename):
 
 # Training
     def train_one_epoch():
+        '''
+        Function to train a single epoch.
+        '''
         running_loss = 0.
 
         for i, data in enumerate(training_loader):
@@ -89,6 +91,7 @@ def fit_network(filename):
 
         return running_loss/len(surface_train_dataset)
 
+# Loops to train multiple epochs.
     EPOCHS = 10_000
     training_loss_tracker = []
     validation_loss_tracker = []
@@ -123,31 +126,37 @@ def fit_network(filename):
         at epoch {validation_loss_min_epoch}')
 
 # Plot progress of training and validation losses
-    fig = plt.figure()
-    epochs = []
-    loss_values = []
-    for i in range(len(training_loss_tracker)):
-        epoch, loss = training_loss_tracker[i]
-        epochs.append(epoch)
-        loss_values.append(loss)
-    ax = plt.axes()
-    ax.scatter(epochs, loss_values, marker='o', label='Training')
+    def plot_losses(training_loss_tracker, validation_loss_tracker):
+        fig = plt.figure()
+        epochs = []
+        loss_values = []
+        for i in range(len(training_loss_tracker)):
+            epoch, loss = training_loss_tracker[i]
+            epochs.append(epoch)
+            loss_values.append(loss)
+        ax = plt.axes()
+        ax.scatter(epochs, loss_values, marker='o', label='Training')
 
-    epochs = []
-    vloss_values = []
-    for i in range(len(validation_loss_tracker)):
-        epoch, vloss = validation_loss_tracker[i]
-        epochs.append(epoch)
-        vloss_values.append(vloss)
-    ax.scatter(epochs, vloss_values, marker='x', label='Validation')
+        epochs = []
+        vloss_values = []
+        for i in range(len(validation_loss_tracker)):
+            epoch, vloss = validation_loss_tracker[i]
+            epochs.append(epoch)
+            vloss_values.append(vloss)
+        ax.scatter(epochs, vloss_values, marker='x', label='Validation')
 
-    plt.xlabel('Epoch')
-    plt.ylabel('Log Loss')
-    plt.legend(loc='upper right')
-    plt.show()
+        plt.xlabel('Epoch')
+        plt.ylabel('Log Loss')
+        plt.legend(loc='upper right')
+        plt.show()
 
-# Plot training data against predictions.
+    plot_losses(training_loss_tracker, validation_loss_tracker)
+
+# Plot data against predictions.
     def plot_fit_vs_values(dataset, model):
+        '''
+        Plot data against predicted responses.
+        '''
         xdata = []
         ydata = []
         data_list = []
