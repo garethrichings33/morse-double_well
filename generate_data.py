@@ -2,11 +2,14 @@
 Generate a CSV file of values of a 2D Morse curve and double well.
 Points are chosen randomly.
 '''
-if __name__ == '__main__':
+
+
+def generate_data(filename):
     import csv
     import math
     import random
 
+# Set random seed for repeatability when testing.
     random.seed(0)
 
     def surface(x, y):
@@ -15,7 +18,7 @@ if __name__ == '__main__':
         return morse + double_well
 
     num_points = 1000
-    with open('surface.csv', 'w') as file:
+    with open(filename, 'w') as file:
         writer = csv.writer(file)
         writer.writerow(["x", "y", "value"])
 
@@ -24,3 +27,9 @@ if __name__ == '__main__':
             y = random.uniform(-5., 5.)
             value = surface(x, y)
             writer.writerow([x, y, value])
+
+    return filename
+
+
+if __name__ == '__main__':
+    generate_data('surface.csv')

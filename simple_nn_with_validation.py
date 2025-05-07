@@ -1,4 +1,5 @@
-if __name__ == '__main__':
+# if __name__ == '__main__':
+def fit_network(filename):
     import math
     import pandas as pd
     import numpy as np
@@ -17,7 +18,7 @@ if __name__ == '__main__':
     torch.use_deterministic_algorithms(True, warn_only=True)
 
 # Get the data from file
-    data_frame = pd.read_csv('surface.csv')
+    data_frame = pd.read_csv(filename)
     X = data_frame.iloc[:, 0:2].to_numpy()
     Y = data_frame['value'].to_numpy()
 
@@ -172,3 +173,11 @@ if __name__ == '__main__':
     plot_fit_vs_values(surface_train_dataset, model)
 # Plot validation data vs predictions
     plot_fit_vs_values(surface_valid_dataset, model)
+
+
+if __name__ == '__main__':
+    from generate_data import generate_data
+
+    filename = 'surface.csv'
+    generate_data(filename)
+    fit_network(filename)
