@@ -1,9 +1,85 @@
+def plot_losses(training_loss_tracker, validation_loss_tracker):
+    '''
+    Plot progress of training and validation losses against epoch number.
+    '''
+    from matplotlib import pyplot as plt
+
+    fig = plt.figure()
+    epochs = []
+    loss_values = []
+    for i in range(len(training_loss_tracker)):
+        epoch, loss = training_loss_tracker[i]
+        epochs.append(epoch)
+        loss_values.append(loss)
+    ax = plt.axes()
+    ax.scatter(epochs, loss_values, marker='o', label='Training')
+
+    epochs = []
+    vloss_values = []
+    for i in range(len(validation_loss_tracker)):
+        epoch, vloss = validation_loss_tracker[i]
+        epochs.append(epoch)
+        vloss_values.append(vloss)
+    ax.scatter(epochs, vloss_values, marker='x', label='Validation')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Log Loss')
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+def plot_fit_vs_values(dataset, model):
+    '''
+    Plot data against predicted responses.
+    '''
+    import torch
+    from matplotlib import pyplot as plt
+
+    xdata = []
+    ydata = []
+    data_list = []
+    prediction_list = []
+    with torch.no_grad():
+        for i in range(len(dataset)):
+            coordinates, fn_value = dataset[i]
+            x, y = tuple(coordinates.numpy())
+            xdata.append(x)
+            ydata.append(y)
+            data_list.append(fn_value.numpy())
+            prediction_list.append(model(coordinates).numpy()[0])
+
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.scatter3D(xdata, ydata, data_list,
+                 c=data_list, cmap='Greens')
+    ax.scatter3D(xdata, ydata, prediction_list,
+                 c=prediction_list, cmap='Reds')
+    plt.show()
+
+
+def train_one_epoch(model, training_loader, optimiser, loss_fn, len_dataset):
+    '''
+    Function to train a single epoch.
+    '''
+    running_loss = 0.
+
+    for i, data in enumerate(training_loader):
+        inputs, fn_values = data
+        optimiser.zero_grad()
+        outputs = model(inputs)
+        loss = loss_fn(outputs.squeeze(), fn_values)
+        loss.backward()
+        optimiser.step()
+        running_loss += loss.item()
+
+    return running_loss/len_dataset
+
+
 def fit_network(filename):
     import math
     import pandas as pd
     import numpy as np
     from mpl_toolkits import mplot3d
-    from matplotlib import pyplot as plt
 
     from sklearn.model_selection import train_test_split
 
@@ -74,23 +150,6 @@ def fit_network(filename):
         model.parameters(), lr=0.0002, weight_decay=0., momentum=0.4)
 
 # Training
-    def train_one_epoch():
-        '''
-        Function to train a single epoch.
-        '''
-        running_loss = 0.
-
-        for i, data in enumerate(training_loader):
-            inputs, fn_values = data
-            optimiser.zero_grad()
-            outputs = model(inputs)
-            loss = loss_fn(outputs.squeeze(), fn_values)
-            loss.backward()
-            optimiser.step()
-            running_loss += loss.item()
-
-        return running_loss/len(surface_train_dataset)
-
 # Loops to train multiple epochs.
     EPOCHS = 10_000
     training_loss_tracker = []
@@ -98,7 +157,11 @@ def fit_network(filename):
     validation_loss_min = 1_000_000
     for epoch in range(EPOCHS):
         model.train(True)
-        training_loss = train_one_epoch()
+        training_loss = train_one_epoch(model,
+                                        training_loader,
+                                        optimiser,
+                                        loss_fn,
+                                        len(surface_train_dataset))
 
         model.eval()
         running_vloss = 0.
@@ -126,57 +189,7 @@ def fit_network(filename):
         at epoch {validation_loss_min_epoch}')
 
 # Plot progress of training and validation losses
-    def plot_losses(training_loss_tracker, validation_loss_tracker):
-        fig = plt.figure()
-        epochs = []
-        loss_values = []
-        for i in range(len(training_loss_tracker)):
-            epoch, loss = training_loss_tracker[i]
-            epochs.append(epoch)
-            loss_values.append(loss)
-        ax = plt.axes()
-        ax.scatter(epochs, loss_values, marker='o', label='Training')
-
-        epochs = []
-        vloss_values = []
-        for i in range(len(validation_loss_tracker)):
-            epoch, vloss = validation_loss_tracker[i]
-            epochs.append(epoch)
-            vloss_values.append(vloss)
-        ax.scatter(epochs, vloss_values, marker='x', label='Validation')
-
-        plt.xlabel('Epoch')
-        plt.ylabel('Log Loss')
-        plt.legend(loc='upper right')
-        plt.show()
-
     plot_losses(training_loss_tracker, validation_loss_tracker)
-
-# Plot data against predictions.
-    def plot_fit_vs_values(dataset, model):
-        '''
-        Plot data against predicted responses.
-        '''
-        xdata = []
-        ydata = []
-        data_list = []
-        prediction_list = []
-        with torch.no_grad():
-            for i in range(len(dataset)):
-                coordinates, fn_value = dataset[i]
-                x, y = tuple(coordinates.numpy())
-                xdata.append(x)
-                ydata.append(y)
-                data_list.append(fn_value.numpy())
-                prediction_list.append(model(coordinates).numpy()[0])
-
-        fig = plt.figure()
-        ax = plt.axes(projection='3d')
-        ax.scatter3D(xdata, ydata, data_list,
-                     c=data_list, cmap='Greens')
-        ax.scatter3D(xdata, ydata, prediction_list,
-                     c=prediction_list, cmap='Reds')
-        plt.show()
 
 # Plot training data vs predictions
     plot_fit_vs_values(surface_train_dataset, model)
