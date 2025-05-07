@@ -1,0 +1,1 @@
+Code to generate a randomly-selected set of points sampled from a 2-dimensional potential energy surface consisting of a Morse curve in one direction and an asymmetric double well in the other, then use a PyTorch neural network to fit a model to the surface.
