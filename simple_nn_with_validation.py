@@ -54,16 +54,14 @@ if __name__ == '__main__':
     class SurfaceModel(nn.Module):
         def __init__(self):
             super(SurfaceModel, self).__init__()
-            self.linear1 = nn.Linear(2, 20)
             self.activation = nn.Tanh()
+            self.linear1 = nn.Linear(2, 20)
             self.linear2 = nn.Linear(20, 20)
-            # self.linear3 = nn.Linear(30, 10)
             self.linear_out = nn.Linear(20, 1)
 
         def forward(self, x):
             x = self.activation(self.linear1(x))
             x = self.activation(self.linear2(x))
-            # x = self.activation(self.linear3(x))
             x = self.linear_out(x)
             return x
 
@@ -87,7 +85,7 @@ if __name__ == '__main__':
 
         return running_loss/len(surface_train_dataset)
 
-    EPOCHS = 30_000
+    EPOCHS = 10_000
     training_loss_tracker = []
     validation_loss_tracker = []
     validation_loss_min = 1_000_000
@@ -144,26 +142,30 @@ if __name__ == '__main__':
     plt.legend(loc='upper right')
     plt.show()
 
-    exit()
-
 # Plot training data against predictions.
-    xdata = []
-    ydata = []
-    training_data_plot = []
-    prediction_data_plot = []
-    with torch.no_grad():
-        for i in range(len(dataset)):
-            coordinates, training_value = dataset[i]
-            x, y = tuple(coordinates.numpy())
-            xdata.append(x)
-            ydata.append(y)
-            training_data_plot.append(training_value.numpy()[0])
-            prediction_data_plot.append(model(coordinates).numpy()[0])
+    def plot_fit_vs_values(dataset, model):
+        xdata = []
+        ydata = []
+        data_list = []
+        prediction_list = []
+        with torch.no_grad():
+            for i in range(len(dataset)):
+                coordinates, fn_value = dataset[i]
+                x, y = tuple(coordinates.numpy())
+                xdata.append(x)
+                ydata.append(y)
+                data_list.append(fn_value.numpy())
+                prediction_list.append(model(coordinates).numpy()[0])
 
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    ax.scatter3D(xdata, ydata, training_data_plot,
-                 c=training_data_plot, cmap='Greens')
-    ax.scatter3D(xdata, ydata, prediction_data_plot,
-                 c=prediction_data_plot, cmap='Reds')
-    plt.show()
+        fig = plt.figure()
+        ax = plt.axes(projection='3d')
+        ax.scatter3D(xdata, ydata, data_list,
+                     c=data_list, cmap='Greens')
+        ax.scatter3D(xdata, ydata, prediction_list,
+                     c=prediction_list, cmap='Reds')
+        plt.show()
+
+# Plot training data vs predictions
+    plot_fit_vs_values(surface_train_dataset, model)
+# Plot validation data vs predictions
+    plot_fit_vs_values(surface_valid_dataset, model)
