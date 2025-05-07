@@ -11,6 +11,8 @@ if __name__ == '__main__':
     from torch import nn
     from torch.utils.data import Dataset, DataLoader, TensorDataset
     from pytorch_lightning import seed_everything
+
+# Random seed to ensure repeatability when testing.
     seed_everything(0, workers=True)
     torch.use_deterministic_algorithms(True, warn_only=True)
 
@@ -27,6 +29,7 @@ if __name__ == '__main__':
      Y_valid) = train_test_split(X,
                                  Y,
                                  test_size=0.2,
+                                 # Fix split for repeatability when testing.
                                  random_state=10)
 
 # Setup the training and validation datasets.
