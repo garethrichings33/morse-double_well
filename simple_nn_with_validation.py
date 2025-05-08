@@ -1,6 +1,3 @@
-import torch
-
-
 def convert_data_to_numpy(data_frame):
     '''
     Extract data from a pandas DataFrame to two numpy arrays:
@@ -134,9 +131,6 @@ def get_validation_loss(model, validation_loader, loss_fn, len_dataset):
 def fit_network(filename):
     import math
     import pandas as pd
-    # import numpy as np
-    # from mpl_toolkits import mplot3d
-
     from sklearn.model_selection import train_test_split
 
     import torch
@@ -202,7 +196,7 @@ def fit_network(filename):
 
 # Training
 # Loops to train multiple epochs.
-    EPOCHS = 100
+    EPOCHS = 10_000
     training_loss_tracker = []
     validation_loss_tracker = []
     validation_loss_min = 1_000_000
