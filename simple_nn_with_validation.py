@@ -1,3 +1,30 @@
+def convert_data_to_numpy(data_frame):
+    '''
+    Extract data from a pandas DataFrame to two numpy arrays:
+    X is an array of the coordinates.
+    Y is an array of the corresponding function values.
+    '''
+    X = data_frame.iloc[:, 0:2].to_numpy()
+    Y = data_frame['value'].to_numpy()
+
+    return X, Y
+
+
+def create_dataset(X, Y):
+    '''
+    Take two arrays containing coordinates (X) and corresponding 
+    function values (Y) and combine them into a DataSet object.
+    '''
+    from numpy import float32
+    from torch import tensor
+    from torch.utils.data import TensorDataset
+
+    X_t = tensor(X.astype(float32))
+    Y_t = tensor(Y.astype(float32))
+
+    return TensorDataset(X_t, Y_t)
+
+
 def plot_losses(training_loss_tracker, validation_loss_tracker):
     '''
     Plot progress of training and validation losses against epoch number.
@@ -92,25 +119,24 @@ def get_validation_loss(model, validation_loader, loss_fn, len_dataset):
 def fit_network(filename):
     import math
     import pandas as pd
-    import numpy as np
-    from mpl_toolkits import mplot3d
+    # import numpy as np
+    # from mpl_toolkits import mplot3d
 
     from sklearn.model_selection import train_test_split
 
     import torch
     from torch import nn
-    from torch.utils.data import Dataset, DataLoader, TensorDataset
+    from torch.utils.data import DataLoader
     from pytorch_lightning import seed_everything
 
 # Random seed to ensure repeatability when testing.
     seed_everything(0, workers=True)
     torch.use_deterministic_algorithms(True, warn_only=True)
 
-# Get the data from file
+# Get data from CSV file.
     data_frame = pd.read_csv(filename)
-    X = data_frame.iloc[:, 0:2].to_numpy()
-    Y = data_frame['value'].to_numpy()
-
+# Extract coordinates and function values to numpy arrays.
+    X, Y = convert_data_to_numpy(data_frame)
 
 # Split data into training and validation sets, fixing the random state.
     (X_train,
@@ -122,14 +148,9 @@ def fit_network(filename):
                                  # Fix split for repeatability when testing.
                                  random_state=10)
 
-# Setup the training and validation datasets.
-    X_train_t = torch.tensor(X_train.astype(np.float32))
-    Y_train_t = torch.tensor(Y_train.astype(np.float32))
-    surface_train_dataset = TensorDataset(X_train_t, Y_train_t)
-
-    X_valid_t = torch.tensor(X_valid.astype(np.float32))
-    Y_valid_t = torch.tensor(Y_valid.astype(np.float32))
-    surface_valid_dataset = TensorDataset(X_valid_t, Y_valid_t)
+# Setup the training and validation DataSets.
+    surface_train_dataset = create_dataset(X_train, Y_train)
+    surface_valid_dataset = create_dataset(X_valid, Y_valid)
 
 # Define the training and validation DataLoaders.
     batch_size = 20
@@ -158,6 +179,7 @@ def fit_network(filename):
             x = self.linear_out(x)
             return x
 
+# Create the objects needed for training.
     model = SurfaceModel()
     loss_fn = nn.MSELoss(reduction='sum')
     optimiser = torch.optim.SGD(
