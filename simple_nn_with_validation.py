@@ -1,3 +1,6 @@
+import torch
+
+
 def convert_data_to_numpy(data_frame):
     '''
     Extract data from a pandas DataFrame to two numpy arrays:
@@ -31,7 +34,7 @@ def plot_losses(training_loss_tracker, validation_loss_tracker):
     '''
     from matplotlib import pyplot as plt
 
-    fig = plt.figure()
+    plt.figure()
     epochs = []
     loss_values = []
     for i in range(len(training_loss_tracker)):
@@ -55,31 +58,43 @@ def plot_losses(training_loss_tracker, validation_loss_tracker):
     plt.show()
 
 
+def extract_surface_data_to_lists(dataset, model):
+    '''
+    Take a Dataset and NN model and extract the coordinates, 
+    and actual and predicted function values to lists.
+    '''
+    from torch import no_grad
+
+    x1_list = []
+    x2_list = []
+    fn_value_list = []
+    prediction_list = []
+    with no_grad():
+        for i in range(len(dataset)):
+            coordinates, fn_value = dataset[i]
+            x1, x2 = coordinates.numpy()[0], coordinates.numpy()[1]
+            x1_list.append(x1)
+            x2_list.append(x2)
+            fn_value_list.append(fn_value.numpy())
+            prediction_list.append(model(coordinates).numpy()[0])
+
+    return x1_list, x2_list, fn_value_list, prediction_list
+
+
 def plot_fit_vs_values(dataset, model):
     '''
     Plot data against predicted responses.
     '''
-    import torch
     from matplotlib import pyplot as plt
 
-    xdata = []
-    ydata = []
-    data_list = []
-    prediction_list = []
-    with torch.no_grad():
-        for i in range(len(dataset)):
-            coordinates, fn_value = dataset[i]
-            x, y = tuple(coordinates.numpy())
-            xdata.append(x)
-            ydata.append(y)
-            data_list.append(fn_value.numpy())
-            prediction_list.append(model(coordinates).numpy()[0])
+    x1, x2, fn_value_list, prediction_list = extract_surface_data_to_lists(
+        dataset, model)
 
-    fig = plt.figure()
+    plt.figure()
     ax = plt.axes(projection='3d')
-    ax.scatter3D(xdata, ydata, data_list,
-                 c=data_list, cmap='Greens')
-    ax.scatter3D(xdata, ydata, prediction_list,
+    ax.scatter3D(x1, x2, fn_value_list,
+                 c=fn_value_list, cmap='Greens')
+    ax.scatter3D(x1, x2, prediction_list,
                  c=prediction_list, cmap='Reds')
     plt.show()
 
@@ -187,7 +202,7 @@ def fit_network(filename):
 
 # Training
 # Loops to train multiple epochs.
-    EPOCHS = 10_000
+    EPOCHS = 100
     training_loss_tracker = []
     validation_loss_tracker = []
     validation_loss_min = 1_000_000
