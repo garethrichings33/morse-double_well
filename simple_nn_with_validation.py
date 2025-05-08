@@ -145,21 +145,21 @@ def fit_network(filename):
 # Get data from CSV file.
     data_frame = pd.read_csv(filename)
 # Extract coordinates and function values to numpy arrays.
-    X, Y = convert_data_to_numpy(data_frame)
+    coordinates, responses = convert_data_to_numpy(data_frame)
 
 # Split data into training and validation sets, fixing the random state.
-    (X_train,
-     X_valid,
-     Y_train,
-     Y_valid) = train_test_split(X,
-                                 Y,
-                                 test_size=0.2,
-                                 # Fix split for repeatability when testing.
-                                 random_state=10)
+    (coordinates_train,
+     coordinates_valid,
+     responses_train,
+     responses_valid) = train_test_split(coordinates,
+                                         responses,
+                                         test_size=0.2,
+                                         # Fix split for repeatability when testing.
+                                         random_state=10)
 
 # Setup the training and validation DataSets.
-    surface_train_dataset = create_dataset(X_train, Y_train)
-    surface_valid_dataset = create_dataset(X_valid, Y_valid)
+    surface_train_dataset = create_dataset(coordinates_train, responses_train)
+    surface_valid_dataset = create_dataset(coordinates_valid, responses_valid)
 
 # Define the training and validation DataLoaders.
     batch_size = 20
