@@ -119,7 +119,7 @@ def get_validation_loss(model, validation_loader, loss_fn, len_dataset):
 
     running_vloss = 0.
     with torch.no_grad():
-        for i, vdata in enumerate(validation_loader):
+        for vdata in validation_loader:
             v_inputs, v_fn_values = vdata
             v_outputs = model(v_inputs)
             vloss = loss_fn(v_outputs.squeeze(), v_fn_values)
