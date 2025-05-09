@@ -215,16 +215,16 @@ def fit_network(filename):
             validation_loss_min = validation_loss
             validation_loss_min_epoch = epoch
 
-        print(f'Epoch: {epoch+1}, Training Loss: {training_loss},\
-              Validation Loss: {validation_loss}')
+        print(f'Epoch: {epoch+1}, Training Loss: {training_loss:14.12f}, '
+              f'Validation Loss: {validation_loss:14.12f}')
         if ((epoch+1) % 50 == 0):
             training_loss_tracker.append(
                 (epoch+1, math.log(training_loss, 10)))
             validation_loss_tracker.append(
                 (epoch+1, math.log(validation_loss, 10)))
 
-    print(f'Minimum validation loss: {validation_loss_min} \
-        at epoch {validation_loss_min_epoch}')
+    print(f'Minimum validation loss: {validation_loss_min:14.12f} '
+          f'at epoch {validation_loss_min_epoch}')
 
 # Plot progress of training and validation losses
     plot_losses(training_loss_tracker, validation_loss_tracker)
